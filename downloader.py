@@ -15,6 +15,7 @@ import pyautogui
 import os
 import pyperclip
 import shutil
+import random
 
 class tiktokBot():
     def __init__(self, window=True):
@@ -27,6 +28,13 @@ class tiktokBot():
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-plugins-discovery")
         self.options.add_argument("--start-maximized")
+        self.options.add_argument("--disable-notifications")
+        self.options.add_argument("--disable-web-security")
+        self.options.add_argument("--disable-extensions")
+        self.options.add_argument("--allow-running-insecure-content")
+        self.options.add_argument("--ignore-certificate-errors")
+        self.options.add_argument("--disable-popup-blocking")
+
         #remove cookies
         self.options.add_argument("--disable-cookies")
         self.options.add_argument("--disable-dev-shm-usage")
@@ -48,7 +56,7 @@ class tiktokBot():
         self.goTo(url)
 
         # find element by name: username, click it and write victorescribanogarcia@gmail.com
-        time.sleep(1)
+        time.sleep(random.randint(1, 4))
         self.username = self.bot.find_element_by_name('username')
         self.username.click()
 
@@ -63,16 +71,16 @@ class tiktokBot():
             time.sleep(interval)
 
         self.username.send_keys(Keys.TAB)
-        time.sleep(2)
         # click tab and write password on the next input
         self.username = self.bot.switch_to.active_element
 
         # Type the password letter by letter with pauses
+        time.sleep(random.randint(1, 4))
         for char in password:
             self.username.send_keys(char)
             time.sleep(interval)
 
-        time.sleep(2)
+        time.sleep(random.randint(5, 30))
         # click enter
         self.username.send_keys(Keys.ENTER)
 
@@ -197,7 +205,7 @@ class tiktokBot():
         self.goTo('https://www.tiktok.com/upload?lang=en')
 
         ############################## Select video ########################################  
-        time.sleep(11)
+        time.sleep(10)
         print(f'Selecting video {video}...')
         upload_button = self.bot.switch_to.active_element
         ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 8).send_keys(Keys.ENTER).perform()
@@ -215,23 +223,34 @@ class tiktokBot():
         print('Entering Uploading page...')
         #click on aria-label="Caption"
         #tab 6 times after waiting 15 secs
-        time.sleep(15)
+        
         #TODO no esperar 15 sino buscar un indicativo que diga que el video ya se subio
-
+        time.sleep(15)
         ############################## Adding description ####################################
         # label_box get current selected field use action chains to tab 6 times from the current selected field
-        label_box = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(label_box).send_keys(Keys.TAB * 5).perform()
+        current = self.bot.switch_to.active_element
+        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
         # Paste the description into the label box
-        label_box = self.bot.switch_to.active_element
-        label_box.send_keys(description)
+        self.bot.switch_to.active_element
+        #write the description
+        pyautogui.write(description)
         print('Description added!')
 
         ############################## Uplad video ####################################
         #11 tabs to get to the post button from the description box
-        ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
+        ActionChains(self.bot).send_keys(Keys.TAB * 11).perform()
+        time.sleep(5)
+        print('Tabbed to post button')
         #Get the current selected field and click enter
         boton_post = self.bot.switch_to.active_element
+        print(f'Current selected field: {boton_post}')
+        time.sleep(5)
+        #highlight the post button
+        ActionChains(self.bot).move_to_element(boton_post).perform()
+        print('Post button highlighted!')
+        time.sleep(5)
+
+        #click the post button
         boton_post.click()
         print('Video uploaded!')
         time.sleep(5)
@@ -266,12 +285,12 @@ bot.login(interval=0.07)
 # time.sleep(5)
 
 print('Entering upload loop...')
-time.sleep(10)
+time.sleep(6)
 full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
 for video in glob.glob('videos/*.mp4'):
     print(video)
     try:
-        bot.upload2TikTok(f'{full_path}\{video}', 'Subscribe and like :D')
+        bot.upload2TikTok(f'{full_path}\{video}', 'Subscribe and like :D ')
     except:
         print('Error uploading video')
         continue
@@ -279,7 +298,3 @@ for video in glob.glob('videos/*.mp4'):
     #move the video to the Used_videos folder
     shutil.move(video, 'Used_videos')
     time.sleep(2)
-
-
-
-    
