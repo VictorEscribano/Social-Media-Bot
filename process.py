@@ -5,7 +5,7 @@ import shutil
 
 if __name__ == "__main__":
     api_token = "r8_Cb06Mjr3LNnlc0Cnamkp6N4sW0utmwF4ShBOK"
-    Description_personality = "You reply by the name of Assistant. You will reply directly with an answer. You are a very clickbait person that wants to go viral."
+    Description_personality = "You reply by the name of Assistant. You will reply directly with an answer. You are a very clickbait person that wants to go viral. You love to add Hashtacks."
     
 
     Description_bot = LLMChatBot(api_token)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     time.sleep(6)
     full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
     for video in glob.glob('videos/*.mp4'):
-        Description_prompt_input = f"Reply with a very realistic Tik-Tok video description and a lot of hashtacks about this video topic: {video}. It needs to go viral. Assistant:"
+        Description_prompt_input = f"Write a very realistic Tik-Tok video description for your last video and a lot of hashtacks about this topic: {video}. It needs to go viral so add a lot of hashtaks related. Assistant:"
         Description = Description_bot.generate_response(Description_personality, 
                                                         Description_prompt_input, 
                                                         temperature=0.5, 
