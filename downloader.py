@@ -14,8 +14,9 @@ from urllib.request import urlopen
 import pyautogui
 import os
 import pyperclip
-import shutil
+import platform
 import random
+import subprocess
 
 class tiktokBot():
     def __init__(self, window=True):
@@ -49,6 +50,16 @@ class tiktokBot():
 
     def goTo(self, url):
         self.bot.get(url)
+
+
+    def goToNewTab(self, url=None):
+        #new tab
+        self.bot.execute_script("window.open('');")
+        #switch to new tab
+        self.bot.switch_to.window(self.bot.window_handles[1])
+        #go to url
+        if url != None:
+            self.goTo(url)
 
 
     def login(self, url='https://www.tiktok.com/login/phone-or-email/email', interval=0.2):
@@ -94,7 +105,7 @@ class tiktokBot():
                 print("Login failed")
                 print("Trying again in 5 minutes")
                 #sleep for 5 minutes
-                time.sleep(300)
+                time.sleep(10)
                 #refresh
                 self.refresh()
                 #login again
@@ -194,6 +205,17 @@ class tiktokBot():
                     break
                 output.write(buffer)
 
+    def copy_to_clipboard(text):
+        if platform.system() == "Windows":
+            # Windows: use 'clip' command
+            subprocess.run("echo " + text.strip() + "| clip", shell=True)
+        elif platform.system() == "Darwin":
+            # macOS: use 'pbcopy' command
+            subprocess.run("echo " + text.strip() + "| pbcopy", shell=True)
+        else:
+            # Linux: use 'xclip' command
+            subprocess.run("echo " + text.strip() + "| xclip -selection clipboard", shell=True)
+
 
     def upload2TikTok(self, video, description):
         #render the headless browser
@@ -213,7 +235,9 @@ class tiktokBot():
         ############################## Selecting video from file explorer ####################
         # copy the video path to the clipboard
         pyperclip.copy(video)
-        time.sleep(2)
+        #another method to copy the video path to the clipboard
+        
+        time.sleep(1)
         pyautogui.hotkey('ctrl', 'v')
         pyautogui.press('enter')
         print(f'Video selected! {video}')
@@ -229,31 +253,34 @@ class tiktokBot():
         ############################## Adding description ####################################
         # label_box get current selected field use action chains to tab 6 times from the current selected field
         current = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
+        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 5).perform()
         # Paste the description into the label box
         self.bot.switch_to.active_element
         #write the description
-        pyautogui.write(description)
+        pyperclip.copy(description)
+        pyautogui.hotkey('ctrl', 'v')
+        # pyautogui.write(description)
         print('Description added!')
 
         ############################## Uplad video ####################################
         #11 tabs to get to the post button from the description box
-        ActionChains(self.bot).send_keys(Keys.TAB * 11).perform()
-        time.sleep(5)
+        ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
         print('Tabbed to post button')
         #Get the current selected field and click enter
         boton_post = self.bot.switch_to.active_element
         print(f'Current selected field: {boton_post}')
-        time.sleep(5)
-        #highlight the post button
-        ActionChains(self.bot).move_to_element(boton_post).perform()
-        print('Post button highlighted!')
-        time.sleep(5)
-
-        #click the post button
-        boton_post.click()
+        #click enter
+        ActionChains(self.bot).move_to_element(boton_post).send_keys(Keys.ENTER).perform()
         print('Video uploaded!')
         time.sleep(5)
+
+        #add a new tab and close the previous one
+        self.bot.execute_script("window.open('');")
+        self.bot.switch_to.window(self.bot.window_handles[0])
+        self.bot.close()
+        self.bot.switch_to.window(self.bot.window_handles[0])
+
+        time.sleep(2)
         
     
     def upload2Instagram(self, video, description):
@@ -267,34 +294,3 @@ class tiktokBot():
 
     def close(self):
         self.bot.quit()
-
-bot = tiktokBot(window=True)
-bot.login(interval=0.07)
-# time.sleep(5)
-# bot.search('#viral')
-# time.sleep(3)
-# bot.scroll(8)
-
-# urls = bot.GetURLs()
-# print(urls)
-# time.sleep(1)
-# for i, url in enumerate(urls):
-#     print(f'Downloading video {i} of {len(urls)}')
-#     bot.download_video(url, i)
-#     time.sleep(10)
-# time.sleep(5)
-
-print('Entering upload loop...')
-time.sleep(6)
-full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
-for video in glob.glob('videos/*.mp4'):
-    print(video)
-    try:
-        bot.upload2TikTok(f'{full_path}\{video}', 'Subscribe and like :D ')
-    except:
-        print('Error uploading video')
-        continue
-    time.sleep(2)
-    #move the video to the Used_videos folder
-    shutil.move(video, 'Used_videos')
-    time.sleep(2)
