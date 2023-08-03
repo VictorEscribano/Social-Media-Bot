@@ -91,7 +91,7 @@ class tiktokBot():
             self.username.send_keys(char)
             time.sleep(interval)
 
-        time.sleep(random.randint(5, 30))
+        time.sleep(random.randint(5, 10))
         # click enter
         self.username.send_keys(Keys.ENTER)
 
@@ -150,8 +150,9 @@ class tiktokBot():
         # get all the classes that starts with tiktok- and get the href if it exists
         videos = self.bot.find_elements_by_xpath("//div[starts-with(@class, 'tiktok-')]//a[@href]")
         self.urls = [video.get_attribute('href') for video in videos ]
+        print('Not filtered videos:', len(self.urls))
         self.urls = self._filter_videos()
-        print('Found', len(self.urls), 'videos')
+        print('Filtered videos: ', len(self.urls))
         return self.urls
 
     def download_video(self, url, id):
@@ -253,18 +254,24 @@ class tiktokBot():
         ############################## Adding description ####################################
         # label_box get current selected field use action chains to tab 6 times from the current selected field
         current = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 5).perform()
+        time.sleep(1)
+        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
+        time.sleep(1)
         # Paste the description into the label box
         self.bot.switch_to.active_element
+        time.sleep(1)
         #write the description
         pyperclip.copy(description)
+        time.sleep(1)
         pyautogui.hotkey('ctrl', 'v')
+        time.sleep(1)
         # pyautogui.write(description)
         print('Description added!')
 
         ############################## Uplad video ####################################
         #11 tabs to get to the post button from the description box
         ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
+        time.sleep(1)
         print('Tabbed to post button')
         #Get the current selected field and click enter
         boton_post = self.bot.switch_to.active_element
@@ -272,8 +279,11 @@ class tiktokBot():
         #click enter
         ActionChains(self.bot).move_to_element(boton_post).send_keys(Keys.ENTER).perform()
         print('Video uploaded!')
-        time.sleep(5)
+        time.sleep(10)
 
+
+        ############################## Closing tab ####################################
+        print('Closing tab...')
         #add a new tab and close the previous one
         self.bot.execute_script("window.open('');")
         self.bot.switch_to.window(self.bot.window_handles[0])
