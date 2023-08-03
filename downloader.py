@@ -18,23 +18,23 @@ import shutil
 
 class tiktokBot():
     def __init__(self, window=True):
-        options = Options()
-        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--profile-directory=Default")
-        options.add_argument("--incognito")
-        options.add_argument("--disable-infobars")
-        options.add_argument("--disable-plugins-discovery")
-        options.add_argument("--start-maximized")
+        self.options = Options()
+        self.options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
+        self.options.add_argument("--disable-blink-features=AutomationControlled")
+        self.options.add_argument("--disable-extensions")
+        self.options.add_argument("--profile-directory=Default")
+        self.options.add_argument("--incognito")
+        self.options.add_argument("--disable-infobars")
+        self.options.add_argument("--disable-plugins-discovery")
+        self.options.add_argument("--start-maximized")
         #remove cookies
-        options.add_argument("--disable-cookies")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--no-sandbox")
+        self.options.add_argument("--disable-cookies")
+        self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("--no-sandbox")
         if window == False:
-            options.add_argument("--headless")
+            self.options.add_argument("--headless")
 
-        self.bot = webdriver.Chrome(options=options, executable_path=CM().install())
+        self.bot = webdriver.Chrome(options=self.options, executable_path=CM().install())
         self.bot.set_window_size(1680, 900)
 
         self.topic = ''
@@ -251,10 +251,9 @@ class tiktokBot():
 
 bot = tiktokBot(window=True)
 bot.login(interval=0.07)
-# # bot.goTo('https://www.tiktok.com/@alvaroglichesyt/video/7092708470415248646')
-# time.sleep(10)
+# time.sleep(5)
 # bot.search('#viral')
-# time.sleep(1)
+# time.sleep(3)
 # bot.scroll(8)
 
 # urls = bot.GetURLs()
@@ -265,15 +264,22 @@ bot.login(interval=0.07)
 #     bot.download_video(url, i)
 #     time.sleep(10)
 # time.sleep(5)
-# bot.close()
 
 print('Entering upload loop...')
 time.sleep(10)
-full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok\videos'
+full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
 for video in glob.glob('videos/*.mp4'):
     print(video)
-    bot.upload2TikTok(f'{full_path}\{video}', 'Subscribe and like :D')
+    try:
+        bot.upload2TikTok(f'{full_path}\{video}', 'Subscribe and like :D')
+    except:
+        print('Error uploading video')
+        continue
     time.sleep(2)
     #move the video to the Used_videos folder
     shutil.move(video, 'Used_videos')
     time.sleep(2)
+
+
+
+    
