@@ -4,3 +4,4 @@ beautifulsoup4
 pyautogui
 pyperclip
 replicate
+pycountry
