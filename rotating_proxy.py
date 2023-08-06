@@ -24,4 +24,3 @@ def get_random_proxy():
 
     return proxy
 
-get_random_proxy()
