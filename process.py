@@ -38,8 +38,12 @@ if __name__ == "__main__":
     full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
     for video in glob.glob('videos/*.mp4'):
         Description_prompt_input = f"Write a very realistic Tik-Tok video description for your last video and a lot of hashtacks about this topic: {video}. It needs to go viral so add a lot of hashtaks related. Assistant:"
-        Description = Description_bot.generate_response(Description_personality, 
+        try:
+            Description = Description_bot.generate_response(Description_personality, 
                                                         Description_prompt_input)
+        except:
+            print('Error generating description')
+            Description = f'Like and subscribe for more videos! {search_text}'
         
         time.sleep(5)
         if Description == None:

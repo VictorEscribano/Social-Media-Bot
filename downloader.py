@@ -17,6 +17,7 @@ import pyperclip
 import platform
 import random
 import subprocess
+from rotating_proxy import get_random_proxy
 
 class tiktokBot():
     def __init__(self, window=True):
@@ -42,6 +43,10 @@ class tiktokBot():
         self.options.add_argument("--no-sandbox")
         if window == False:
             self.options.add_argument("--headless")
+
+        # #get proxy
+        # self.proxy = get_random_proxy()
+        # self.options.add_argument(f'--proxy-server={self.proxy}')
 
         self.bot = webdriver.Chrome(options=self.options, executable_path=CM().install())
         self.bot.set_window_size(1680, 900)

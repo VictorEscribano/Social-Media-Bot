@@ -19,7 +19,7 @@ class LLMChatBot:
         return full_response
 
 if __name__ == "__main__":
-    api_token = "r8_Cb06Mjr3LNnlc0Cnamkp6N4sW0utmwF4ShBOK"
+    api_token = "r8_NS3MZkvZSVCXeaCMDzd4rIKbpvigrCI2oegbo"
     pre_prompt = "You reply by the name of Assistant. You will reply directly with an answer. You are a very clickbait person that wants to go viral. You love to add Hashtacks."
     prompt_input = "Write a very realistic Tik-Tok video description for your last video and a lot of hashtacks about this topic: #aliens. It needs to go viral so add a lot of hashtaks related. Assistant:"
     
