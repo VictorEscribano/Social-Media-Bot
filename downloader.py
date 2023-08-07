@@ -82,10 +82,19 @@ class tiktokBot():
 
         # Type the email address letter by letter with pauses
         #read from login.json
-        with open('login.json') as f:
-            data = json.load(f)
-            email = data['username']
-            password = data['password']                    
+        try:
+            with open('Utils/login.json') as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    user_info = data[0]  # Access the first dictionary in the list
+                    email = user_info['username']
+                    password = user_info['password']
+                else:
+                    print("Error: 'login.json' does not contain valid user information.")
+        except FileNotFoundError:
+            print("Error: File 'login.json' not found.")
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON format in 'login.json'.")                   
 
         
         for char in email:
@@ -147,7 +156,7 @@ class tiktokBot():
         print('Scrolling...')
         for i in range(scroll_times):
             self.bot.execute_script('window.scrollTo(0, document.body.scrollHeight)')
-            time.sleep(2)
+            time.sleep(0.5)
 
     def _filter_videos(self):
         # Create a new list to store the filtered URLs
@@ -312,7 +321,9 @@ class tiktokBot():
             # Encuentra todos los elementos que representan los contadores de "me gusta" de los comentarios
             like_counters = self.bot.find_elements_by_xpath("//span[@data-e2e='comment-like-count']")
             print(f'Cantidad de comentarios encontrados: {len(like_counters)}')
-            
+            self.getUsersFromComments()
+
+            print('Empezando a dar me gusta a los comentarios...')
             for counter in like_counters:
                 try:
                     #dar like a los comentarios
@@ -331,30 +342,31 @@ class tiktokBot():
 
     def getUsersFromComments(self):
         #get all the users that are on data-e2e="comment-username-1"
-        usernames = []
+        self.usernames = []
         # user_elements = self.bot.find_elements_by_css_selector('[data-e2e="comment-username-1"]')
         # usernames = [element.text for element in user_elements]
         # user elements are all the hrefs that are on the data-e2e="search-comment-container" div
         user_elements = self.bot.find_elements_by_css_selector('[data-e2e="search-comment-container"] a')
-        usernames = [element.get_attribute('href').split('/')[3] for element in user_elements]
+        self.usernames = [element.get_attribute('href').split('/')[3] for element in user_elements]
         #remove repeated usernames
-        usernames = list(dict.fromkeys(usernames))
-        return usernames
+        self.usernames = list(dict.fromkeys(self.usernames))
+        print(f'Cantidad de usuarios entonctrados: {len(self.usernames)}')
 
     def followAccounts(self, url=None):
         print('Following accounts...')
         #empty self.usernames
-        self.usernames = []
         if url:
             self.bot.get(url)
             time.sleep(5)
-        for username in self.getUsersFromComments():
+        for username in self.usernames:
             try:
                 #go to https://www.tiktok.com/ + username
                 self.goTo(f'https://www.tiktok.com/{username}')
+                time.sleep(0.1)
                 #click on follow
                 follow_user = self.bot.find_elements_by_css_selector('[data-e2e="follow-button"]')
                 follow_user[0].click()
+                time.sleep(1.5)
                 print('\033[92m' + f'Siguiendo a {username}' + '\033[0m')
             except Exception as e:
                 print('\033[91m' + f"Error al seguir a {username}." + '\033[0m')
@@ -386,8 +398,8 @@ class tiktokBot():
 bot = tiktokBot()
 bot.login()
 time.sleep(5)
-bot.search('india tiktok')
-bot.scroll(10)
+bot.search('magic the gathering')
+bot.scroll(15)
 time.sleep(2)
 videos = bot.GetURLs()
 while videos is None:
@@ -396,5 +408,5 @@ while videos is None:
 
 for video in videos:
     print(f'\nGoing to {video}')
-    bot.like_comments(video, 4)
+    bot.like_comments(video, 20)
     bot.followAccounts(video)
