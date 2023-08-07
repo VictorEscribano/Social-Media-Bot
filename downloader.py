@@ -17,6 +17,7 @@ import pyperclip
 import platform
 import random
 import subprocess
+import json
 from rotating_proxy import get_random_proxy
 
 class tiktokBot():
@@ -80,9 +81,11 @@ class tiktokBot():
         self.username.click()
 
         # Type the email address letter by letter with pauses
-        email = 'victorescribanogarcia@gmail.com'
-        # email = 'bakuvic@hotmail.com'
-        password = 'Victor123*'                         
+        #read from login.json
+        with open('login.json') as f:
+            data = json.load(f)
+            email = data['username']
+            password = data['password']                    
 
         
         for char in email:
