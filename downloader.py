@@ -20,7 +20,7 @@ import subprocess
 from rotating_proxy import get_random_proxy
 
 class tiktokBot():
-    def __init__(self, window=True):
+    def __init__(self, window=True, proxy=False):
         self.options = Options()
         self.options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36")
         self.options.add_argument("--disable-blink-features=AutomationControlled")
@@ -36,7 +36,8 @@ class tiktokBot():
         self.options.add_argument("--allow-running-insecure-content")
         self.options.add_argument("--ignore-certificate-errors")
         self.options.add_argument("--disable-popup-blocking")
-
+        self.options.add_argument("--log-level=3")
+        
         #remove cookies
         self.options.add_argument("--disable-cookies")
         self.options.add_argument("--disable-dev-shm-usage")
@@ -45,8 +46,9 @@ class tiktokBot():
             self.options.add_argument("--headless")
 
         # #get proxy
-        # self.proxy = get_random_proxy()
-        # self.options.add_argument(f'--proxy-server={self.proxy}')
+        if proxy == True:
+            self.proxy = get_random_proxy()
+            self.options.add_argument(f'--proxy-server={self.proxy}')
 
         self.bot = webdriver.Chrome(options=self.options, executable_path=CM().install())
         self.bot.set_window_size(1680, 900)
@@ -96,19 +98,20 @@ class tiktokBot():
             self.username.send_keys(char)
             time.sleep(interval)
 
-        time.sleep(random.randint(5, 10))
+        time.sleep(random.randint(3, 7))
         # click enter
         self.username.send_keys(Keys.ENTER)
 
         try:
-            wait = WebDriverWait(self.bot, 3)
+            wait = WebDriverWait(self.bot, 5)
             error_message = wait.until(EC.visibility_of_element_located((By.XPATH, '//div[@type="error"]//span[@role="status"]')))
 
             # Verifica si el mensaje de error está presente en la página
             if error_message.is_displayed():
                 print("Error:", error_message.text)
-                print("Login failed")
-                print("Trying again in 5 minutes")
+                #print in red color
+                print('\033[91m' + 'Login failed' + '\033[0m')
+                print("Trying again in 10 seconds...\n")
                 #sleep for 5 minutes
                 time.sleep(10)
                 #refresh
@@ -116,7 +119,8 @@ class tiktokBot():
                 #login again
                 self.login()
         except:
-            print('Login successfull')
+            #print in green color
+            print('\033[92m' + 'Login successfull' + '\033[0m')
 
     def refresh(self):
         self.bot.refresh()
@@ -125,10 +129,15 @@ class tiktokBot():
         print('Searching for', topic)
         self.topic = topic
         #seqrch by name q = self.bot.find_element_by_name('q'), click and write topic and hit enter
-        self.search = self.bot.find_element_by_name('q')
-        self.search.click()
-        self.search.send_keys(topic)
-        self.search.send_keys(Keys.ENTER)
+        try:
+            self.searchBTN = self.bot.find_element_by_name('q')
+            time.sleep(0.5)
+            self.searchBTN.click()
+            self.searchBTN.send_keys(topic)
+            self.searchBTN.send_keys(Keys.ENTER)
+        except:
+            print('\033[91m' + 'Error searching for ' + topic + '\033[0m')
+            time.sleep(5)
 
     def scroll(self, scroll_times=10):
         print('Scrolling...')
@@ -211,17 +220,6 @@ class tiktokBot():
                     break
                 output.write(buffer)
 
-    def copy_to_clipboard(text):
-        if platform.system() == "Windows":
-            # Windows: use 'clip' command
-            subprocess.run("echo " + text.strip() + "| clip", shell=True)
-        elif platform.system() == "Darwin":
-            # macOS: use 'pbcopy' command
-            subprocess.run("echo " + text.strip() + "| pbcopy", shell=True)
-        else:
-            # Linux: use 'xclip' command
-            subprocess.run("echo " + text.strip() + "| xclip -selection clipboard", shell=True)
-
 
     def upload2TikTok(self, video, description):
         #render the headless browser
@@ -236,7 +234,7 @@ class tiktokBot():
         time.sleep(10)
         print(f'Selecting video {video}...')
         upload_button = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 8).send_keys(Keys.ENTER).perform()
+        ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 11).send_keys(Keys.ENTER).perform()
 
         ############################## Selecting video from file explorer ####################
         # copy the video path to the clipboard
@@ -260,7 +258,7 @@ class tiktokBot():
         # label_box get current selected field use action chains to tab 6 times from the current selected field
         current = self.bot.switch_to.active_element
         time.sleep(1)
-        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
+        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 5).perform()
         time.sleep(1)
         # Paste the description into the label box
         self.bot.switch_to.active_element
@@ -275,7 +273,7 @@ class tiktokBot():
 
         ############################## Uplad video ####################################
         #11 tabs to get to the post button from the description box
-        ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
+        ActionChains(self.bot).send_keys(Keys.TAB * 11).perform()
         time.sleep(1)
         print('Tabbed to post button')
         #Get the current selected field and click enter
@@ -298,14 +296,68 @@ class tiktokBot():
         time.sleep(2)
         
     
-    def upload2Instagram(self, video, description):
+    def like_comments(self, url, scroll_times=10):
+        
+        self.bot.get(url)
+        self.likeVideo()
+        try:
+            
+            WebDriverWait(self.bot, 10).until(EC.presence_of_element_located((By.XPATH, "//span[@data-e2e='comment-like-count']")))
+            self.scroll(scroll_times)
+
+            # Encuentra todos los elementos que representan los contadores de "me gusta" de los comentarios
+            like_counters = self.bot.find_elements_by_xpath("//span[@data-e2e='comment-like-count']")
+            print(f'\nCantidad de comentarios: {len(like_counters)}\n')
+            
+            for counter in like_counters:
+                try:
+                    self.bot.execute_script("arguments[0].click();", counter)
+                except Exception as e:
+                    # print in red color
+                    print('\033[91m' + "Error al dar 'me gusta' en los comentarios." + '\033[0m')
+                    continue
+
+            # print in green color
+            print('\033[92m' + "Me gusta en los comentarios realizados correctamente." + '\033[0m')
+        except Exception as e:
+            # print in red color
+            print('\033[91m' + "Error al dar 'me gusta' en los comentarios." + '\033[0m')
+
+
+    def followAccounts(self, url):
         pass
 
-    def upload2Facebook(self, video, description):
-        pass
+    def likeVideo(self, url=None):
+        if url:
+            self.bot.get(url)
+            time.sleep(5)
 
-    def upload2Youtube(self, video, description):
-        pass
+        try:
+            like_button = self.bot.find_element_by_css_selector('.tiktok-riabsu-DivVideoContainer')
+            # Realizar el doble clic para dar like al video
+            actions = ActionChains(self.bot)
+            actions.double_click(like_button).perform()
+            # print in green color
+            print('\033[92m' + "Me gusta en el video realizado correctamente." + '\033[0m')
+        except Exception as e:
+            # print in red color
+            print('\033[91m' + "Error al dar 'me gusta' en el video." + '\033[0m')
 
     def close(self):
         self.bot.quit()
+
+
+bot = tiktokBot()
+bot.login()
+time.sleep(5)
+bot.search('aliens')
+bot.scroll(4)
+time.sleep(2)
+videos = bot.GetURLs()
+while videos is None:
+    bot.refresh()
+    videos = bot.GetURLs()
+
+for video in videos:
+    print(video)
+    bot.like_comments(video)
