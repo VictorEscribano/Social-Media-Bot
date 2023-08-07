@@ -1,2 +1,3 @@
-videos/*.mp4
-Used_videos/*.mp4
+*.mp4
+*.mp4
+Utils\login.txt

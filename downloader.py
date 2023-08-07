@@ -54,6 +54,7 @@ class tiktokBot():
         self.bot.set_window_size(1680, 900)
 
         self.topic = ''
+        self.usernames = []
 
     def goTo(self, url):
         self.bot.get(url)
@@ -307,11 +308,13 @@ class tiktokBot():
 
             # Encuentra todos los elementos que representan los contadores de "me gusta" de los comentarios
             like_counters = self.bot.find_elements_by_xpath("//span[@data-e2e='comment-like-count']")
-            print(f'\nCantidad de comentarios: {len(like_counters)}\n')
+            print(f'Cantidad de comentarios encontrados: {len(like_counters)}')
             
             for counter in like_counters:
                 try:
+                    #dar like a los comentarios
                     self.bot.execute_script("arguments[0].click();", counter)
+                    time.sleep(0.2)
                 except Exception as e:
                     # print in red color
                     print('\033[91m' + "Error al dar 'me gusta' en los comentarios." + '\033[0m')
@@ -323,9 +326,39 @@ class tiktokBot():
             # print in red color
             print('\033[91m' + "Error al dar 'me gusta' en los comentarios." + '\033[0m')
 
+    def getUsersFromComments(self):
+        #get all the users that are on data-e2e="comment-username-1"
+        usernames = []
+        # user_elements = self.bot.find_elements_by_css_selector('[data-e2e="comment-username-1"]')
+        # usernames = [element.text for element in user_elements]
+        # user elements are all the hrefs that are on the data-e2e="search-comment-container" div
+        user_elements = self.bot.find_elements_by_css_selector('[data-e2e="search-comment-container"] a')
+        usernames = [element.get_attribute('href').split('/')[3] for element in user_elements]
+        #remove repeated usernames
+        usernames = list(dict.fromkeys(usernames))
+        return usernames
 
-    def followAccounts(self, url):
-        pass
+    def followAccounts(self, url=None):
+        print('Following accounts...')
+        #empty self.usernames
+        self.usernames = []
+        if url:
+            self.bot.get(url)
+            time.sleep(5)
+        for username in self.getUsersFromComments():
+            try:
+                #go to https://www.tiktok.com/ + username
+                self.goTo(f'https://www.tiktok.com/{username}')
+                #click on follow
+                follow_user = self.bot.find_elements_by_css_selector('[data-e2e="follow-button"]')
+                follow_user[0].click()
+                print('\033[92m' + f'Siguiendo a {username}' + '\033[0m')
+            except Exception as e:
+                print('\033[91m' + f"Error al seguir a {username}." + '\033[0m')
+                continue
+        # print('\033[92m' + "Usuarios seguidos correctamente." + '\033[0m')
+
+
 
     def likeVideo(self, url=None):
         if url:
@@ -350,8 +383,8 @@ class tiktokBot():
 bot = tiktokBot()
 bot.login()
 time.sleep(5)
-bot.search('aliens')
-bot.scroll(4)
+bot.search('india tiktok')
+bot.scroll(10)
 time.sleep(2)
 videos = bot.GetURLs()
 while videos is None:
@@ -359,5 +392,6 @@ while videos is None:
     videos = bot.GetURLs()
 
 for video in videos:
-    print(video)
-    bot.like_comments(video)
+    print(f'\nGoing to {video}')
+    bot.like_comments(video, 4)
+    bot.followAccounts(video)
