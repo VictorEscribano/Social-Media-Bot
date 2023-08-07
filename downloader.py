@@ -57,6 +57,73 @@ class tiktokBot():
         self.topic = ''
         self.usernames = []
 
+        self.numOfLikes = 0
+        self.numOfFollows = 0
+        self.numOfComments = 0
+        self.numOfVideos = 0
+        self.numOfDownloads = 0
+
+        self.getUserPass()
+        #remove the @ and what is after it
+        self.csvName = self.email.split('@')[0]
+        self.initCSV(f'{self.csvName}.csv')
+
+    def initCSV(self, filename):
+        self.filename = filename
+        #create csv file if it doesn't exist and write the headers: Date, NumOfLikes, NumOfFollows, NumOfComments, NumOfVideos
+        if not os.path.isfile(self.filename):
+            with open(self.filename, 'w', encoding='utf-8') as f:
+                f.write('Date,NumOfLikes,NumOfFollows,NumOfComments,NumOfVideos,NumOfDownloads\n')
+        
+        # if there is no date or the date written is not today's date, write the date
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            if len(lines) == 1 or lines[-1].split(',')[0] != time.strftime('%d/%m/%Y'):
+                self.updateCSV()
+
+    def updateCSV(self):
+        #update the last line of the csv file
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            lastLine = lines[-1].split(',')
+            lastLine[0] = time.strftime('%d/%m/%Y')
+            lastLine[1] = str(self.numOfLikes)
+            lastLine[2] = str(self.numOfFollows)
+            lastLine[3] = str(self.numOfComments)
+            lastLine[4] = str(self.numOfVideos)
+            lastLine[5] = str(self.numOfDownloads)
+            lines[-1] = ','.join(lastLine)
+        with open(self.filename, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+
+    def CheckDate(self):
+        #return True if the date written in the csv file is today's date
+        with open(self.filename, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            if len(lines) > 1 and lines[-1].split(',')[0] == time.strftime('%d/%m/%Y'):
+                return True
+            else:
+                #update the csv file
+                self.updateCSV()
+                return False
+
+    def getUserPass(self):
+        #read from login.json
+        try:
+            with open('Utils/login.json') as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    user_info = data[0]  # Access the first dictionary in the list
+                    self.email = user_info['username']
+                    self.password = user_info['password']
+                else:
+                    print("Error: 'login.json' does not contain valid user information.")
+        except FileNotFoundError:
+            print("Error: File 'login.json' not found.")
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON format in 'login.json'.")  
+
+
     def goTo(self, url):
         self.bot.get(url)
 
@@ -79,25 +146,9 @@ class tiktokBot():
         time.sleep(random.randint(1, 4))
         self.username = self.bot.find_element_by_name('username')
         self.username.click()
+            
 
-        # Type the email address letter by letter with pauses
-        #read from login.json
-        try:
-            with open('Utils/login.json') as f:
-                data = json.load(f)
-                if isinstance(data, list) and len(data) > 0:
-                    user_info = data[0]  # Access the first dictionary in the list
-                    email = user_info['username']
-                    password = user_info['password']
-                else:
-                    print("Error: 'login.json' does not contain valid user information.")
-        except FileNotFoundError:
-            print("Error: File 'login.json' not found.")
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON format in 'login.json'.")                   
-
-        
-        for char in email:
+        for char in self.email:
             self.username.send_keys(char)
             time.sleep(interval)
 
@@ -107,7 +158,7 @@ class tiktokBot():
 
         # Type the password letter by letter with pauses
         time.sleep(random.randint(1, 4))
-        for char in password:
+        for char in self.password:
             self.username.send_keys(char)
             time.sleep(interval)
 
@@ -232,6 +283,7 @@ class tiktokBot():
                 if not buffer:
                     break
                 output.write(buffer)
+                self.numOfDownloads += 1
 
 
     def upload2TikTok(self, video, description):
@@ -275,6 +327,7 @@ class tiktokBot():
         time.sleep(1)
         # Paste the description into the label box
         self.bot.switch_to.active_element
+
         time.sleep(1)
         #write the description
         pyperclip.copy(description)
@@ -294,7 +347,9 @@ class tiktokBot():
         print(f'Current selected field: {boton_post}')
         #click enter
         ActionChains(self.bot).move_to_element(boton_post).send_keys(Keys.ENTER).perform()
+
         print('Video uploaded!')
+        self.numOfVideos += 1
         time.sleep(10)
 
 
@@ -313,6 +368,7 @@ class tiktokBot():
         
         self.bot.get(url)
         self.likeVideo()
+        
         try:
             
             WebDriverWait(self.bot, 10).until(EC.presence_of_element_located((By.XPATH, "//span[@data-e2e='comment-like-count']")))
@@ -328,6 +384,7 @@ class tiktokBot():
                 try:
                     #dar like a los comentarios
                     self.bot.execute_script("arguments[0].click();", counter)
+                    self.numOfLikes += 1
                     time.sleep(0.2)
                 except Exception as e:
                     # print in red color
@@ -368,6 +425,7 @@ class tiktokBot():
                 follow_user[0].click()
                 time.sleep(1.5)
                 print('\033[92m' + f'Siguiendo a {username}' + '\033[0m')
+                self.numOfFollows += 1
             except Exception as e:
                 print('\033[91m' + f"Error al seguir a {username}." + '\033[0m')
                 continue
@@ -387,6 +445,7 @@ class tiktokBot():
             actions.double_click(like_button).perform()
             # print in green color
             print('\033[92m' + "Me gusta en el video realizado correctamente." + '\033[0m')
+            self.numOfLikes += 1
         except Exception as e:
             # print in red color
             print('\033[91m' + "Error al dar 'me gusta' en el video." + '\033[0m')
@@ -395,18 +454,18 @@ class tiktokBot():
         self.bot.quit()
 
 
-bot = tiktokBot()
-bot.login()
-time.sleep(5)
-bot.search('magic the gathering')
-bot.scroll(15)
-time.sleep(2)
-videos = bot.GetURLs()
-while videos is None:
-    bot.refresh()
-    videos = bot.GetURLs()
+# bot = tiktokBot()
+# bot.login()
+# time.sleep(5)
+# bot.search('magic the gathering')
+# bot.scroll(15)
+# time.sleep(2)
+# videos = bot.GetURLs()
+# while videos is None:
+#     bot.refresh()
+#     videos = bot.GetURLs()
 
-for video in videos:
-    print(f'\nGoing to {video}')
-    bot.like_comments(video, 20)
-    bot.followAccounts(video)
+# for video in videos:
+#     print(f'\nGoing to {video}')
+#     bot.like_comments(video, 20)
+#     bot.followAccounts(video)
