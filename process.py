@@ -1,4 +1,4 @@
-from downloader import *
+from TikTokBot import *
 from Chatbot import *
 import shutil
 
