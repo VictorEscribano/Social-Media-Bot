@@ -1,3 +1,4 @@
 *.txt
 *.mp4
 Utils/login.json
+Utils/InstagramUserPass.json

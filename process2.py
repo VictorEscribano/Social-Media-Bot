@@ -6,7 +6,18 @@ api_token = "r8_Cb06Mjr3LNnlc0Cnamkp6N4sW0utmwF4ShBOK"
 full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
 
 Description_personality = "You reply by the name of Assistant. You will reply directly with an answer. You are a very clickbait person that wants to go viral. You love to add Hashtacks."
-search_texts = ['matt walsh LGBQT+', 'Ben Shapiro LGBQT+', 'Piers Morgan LGBQT+']
+search_texts = [
+    "#FunnyMemes",
+    "#DankMemes",
+    "#edgymemes",
+    "#HumorDaily",
+    "#lmao",
+    "#LOLs",
+    "#JokesOnYou",
+    "#MemeMania",
+    "#ComedyGold",
+    "#GiggleFest"
+]
 Description = f'Follow for the truth. Stop this stupiditty from humanity.🥴🥴\n\n#mattwalsh #fyp #foryou #MattWalsh #whatisawoman #woman #transgender #lgbt #factsoverfeelings #fypシ #letstalkaboutit #lgbt #transissues #benshapiro#piersmorgan#gaymarriage#gay #rightwing#politics#encyclopediaconservatism#conservative #conservatives #slander #sugarcrashedit #meme #piersmorgan #pride #lgbtq #debate #samsmith #demilovato #gender #genderidentity #funny #hazardboys'
 urls = []
 
@@ -58,28 +69,28 @@ if __name__ == "__main__":
 
 
     print('\033[94m' + 'Empezando rutina de Desacargas' + '\033[0m')
-    # for search_text in search_texts:
-    #     search_and_download(bot, search_text, num_of_videos=10, scroll=1)
-    #     print(f'\nGoing to {search_text}')
-    #     bot.updateCSV()
-    # #randomize the videos folder
-    # with open('videos.txt', 'r') as f:
-    #     videos = f.readlines()
-    #     random.shuffle(videos)
+    for search_text in search_texts:
+        search_and_download(bot, search_text, num_of_videos=10, scroll=1)
+        print(f'\nGoing to {search_text}')
+        bot.updateCSV()
+    #randomize the videos folder
+    with open('videos.txt', 'r') as f:
+        videos = f.readlines()
+        random.shuffle(videos)
 
     print('\033[94m' + 'Saliendo de rutina de Descargas\n' + '\033[0m')
 
 
 
     print('\033[94m' + 'Entrando en rutina de Uploading' + '\033[0m')
-    # for video in glob.glob('videos/*.mp4'):
-    #     #only upload 5 videos per day
-    #     if (bot.numOfUploads > 5 and bot.CheckDate()):
-    #         print('We have reached the limit of uploads for today')
-    #         break
-    #     upload_video(bot, video, Description)
-    #     print(f'\nGoing to {video}')
-    #     bot.updateCSV()
+    for video in glob.glob('videos/*.mp4'):
+        #only upload 5 videos per day
+        if (bot.numOfUploads > 5 and bot.CheckDate()):
+            print('We have reached the limit of uploads for today')
+            break
+        upload_video(bot, video, Description)
+        print(f'\nGoing to {video}')
+        bot.updateCSV()
     print('\033[94m' + 'Saliendo de rutina de Uploading\n' + '\033[0m')
     
 
@@ -102,4 +113,4 @@ if __name__ == "__main__":
                 bot.like_comments(url, 4)
             bot.followAccounts(url)
             bot.updateCSV()
-        print('\033[94m' + 'Saliendo de la rutina de Following' + '\033[0m')
+    print('\033[94m' + 'Saliendo de la rutina de Following' + '\033[0m')

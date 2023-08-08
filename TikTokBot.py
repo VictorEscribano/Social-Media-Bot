@@ -121,10 +121,10 @@ class tiktokBot():
                 self.updateCSV()
                 return False
 
-    def getUserPass(self):
+    def getUserPass(self, filename='login.json'):
         #read from login.json
         try:
-            with open('Utils/login.json') as f:
+            with open(f'Utils/{filename}') as f:
                 data = json.load(f)
                 if isinstance(data, list) and len(data) > 0:
                     user_info = data[0]  # Access the first dictionary in the list
@@ -157,7 +157,18 @@ class tiktokBot():
         self.goTo(url)
 
         # find element by name: username, click it and write victorescribanogarcia@gmail.com
-        time.sleep(random.randint(1, 4))
+        time.sleep(random.randint(2, 5))
+        try:
+            time.sleep(1)
+            wait = WebDriverWait(self.bot, 10)  # Adjust the timeout as needed
+            allow_cookies_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Permitir todas las cookies']")))
+            allow_cookies_button.click()
+            print("Clicked on 'Permitir todas las cookies' button.")
+            time.sleep(1)
+        except:
+            print('No cookie banner found')
+
+
         self.username = self.bot.find_element_by_name('username')
         self.username.click()
             
