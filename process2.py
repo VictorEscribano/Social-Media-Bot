@@ -6,8 +6,8 @@ api_token = "r8_Cb06Mjr3LNnlc0Cnamkp6N4sW0utmwF4ShBOK"
 full_path = r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'
 
 Description_personality = "You reply by the name of Assistant. You will reply directly with an answer. You are a very clickbait person that wants to go viral. You love to add Hashtacks."
-search_text = 'win 1k followers fast viral'
-Description = f'This is a platform to help everyone can win followers 😍🥰❤️\nFollow the steps:\n1. Follow me\n2. Give like to the video.\n3. Leave a comment.\n4.Follow the other people in the comments.\n #gain99 #helpingsmalltiktokers #letshelpeachother #growacccount #2022 #follow #tiktok #fyp #followme #trending #viral #kpop #hanni#newjeans#fancam#fyp #unflopme #followtrain #followforafollow #xyzbca #fyp #1k #1kfollowers #legit💯 #notif99 #sabognotiffmo9999 #FYP #fypppppppppppppppppppppp'
+search_texts = ['matt walsh LGBQT+', 'Ben Shapiro LGBQT+', 'Piers Morgan LGBQT+']
+Description = f'Follow for the truth. Stop this stupiditty from humanity.🥴🥴\n\n#mattwalsh #fyp #foryou #MattWalsh #whatisawoman #woman #transgender #lgbt #factsoverfeelings #fypシ #letstalkaboutit #lgbt #transissues #benshapiro#piersmorgan#gaymarriage#gay #rightwing#politics#encyclopediaconservatism#conservative #conservatives #slander #sugarcrashedit #meme #piersmorgan #pride #lgbtq #debate #samsmith #demilovato #gender #genderidentity #funny #hazardboys'
 urls = []
 
 def search_and_download(bot, search_text, num_of_videos=6, scroll=1):
@@ -58,35 +58,48 @@ if __name__ == "__main__":
 
 
     print('\033[94m' + 'Empezando rutina de Desacargas' + '\033[0m')
-    # search_and_download(bot, search_text, num_of_videos=4, scroll=1)
+    # for search_text in search_texts:
+    #     search_and_download(bot, search_text, num_of_videos=10, scroll=1)
+    #     print(f'\nGoing to {search_text}')
+    #     bot.updateCSV()
+    # #randomize the videos folder
+    # with open('videos.txt', 'r') as f:
+    #     videos = f.readlines()
+    #     random.shuffle(videos)
+
     print('\033[94m' + 'Saliendo de rutina de Descargas\n' + '\033[0m')
 
 
 
     print('\033[94m' + 'Entrando en rutina de Uploading' + '\033[0m')
-    for video in glob.glob('videos/*.mp4'):
-        upload_video(bot, video, Description)
-        print(f'\nGoing to {video}')
-        bot.updateCSV()
+    # for video in glob.glob('videos/*.mp4'):
+    #     #only upload 5 videos per day
+    #     if (bot.numOfUploads > 5 and bot.CheckDate()):
+    #         print('We have reached the limit of uploads for today')
+    #         break
+    #     upload_video(bot, video, Description)
+    #     print(f'\nGoing to {video}')
+    #     bot.updateCSV()
     print('\033[94m' + 'Saliendo de rutina de Uploading\n' + '\033[0m')
     
 
 
     print('\033[94m' + 'Empezando rutina de Following' + '\033[0m')
-    bot.goTo('https://www.tiktok.com/')
-    time.sleep(10)
-    bot.search(search_text)
-    time.sleep(5)
-    bot.scroll(3)
-    urls = bot.GetURLs()
-    time.sleep(1)
-    for url in urls:
-        print(f'\nGoing to {url}')
-        # check if we uploaded more than 200 videos today
-        if (bot.numOfLikes > 200 and bot.CheckDate()):
-            print('We have reached the limit of likes for today')
-        else:
-            bot.like_comments(url, 20)
-        bot.followAccounts(url)
-        bot.updateCSV()
-    print('\033[94m' + 'Saliendo de la rutina de Following' + '\033[0m')
+    for search_text in search_texts:
+        bot.goTo('https://www.tiktok.com/')
+        time.sleep(2)
+        bot.search(search_text)
+        time.sleep(5)
+        bot.scroll(1)
+        urls = bot.GetURLs()
+        time.sleep(1)
+        for url in urls:
+            print(f'\nGoing to {url}')
+            # check if we uploaded more than 200 videos today
+            if (bot.numOfLikes > 200 and bot.CheckDate()):
+                print('We have reached the limit of likes for today')
+            else:
+                bot.like_comments(url, 4)
+            bot.followAccounts(url)
+            bot.updateCSV()
+        print('\033[94m' + 'Saliendo de la rutina de Following' + '\033[0m')

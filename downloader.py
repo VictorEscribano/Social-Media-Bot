@@ -38,6 +38,9 @@ class tiktokBot():
         self.options.add_argument("--ignore-certificate-errors")
         self.options.add_argument("--disable-popup-blocking")
         self.options.add_argument("--log-level=3")
+        #silence the webdrivermanager
+        self.options.add_experimental_option('excludeSwitches', ['enable-logging'])
+
         
         #remove cookies
         self.options.add_argument("--disable-cookies")
@@ -57,11 +60,6 @@ class tiktokBot():
         self.topic = ''
         self.usernames = []
 
-        self.numOfLikes = 0
-        self.numOfFollows = 0
-        self.numOfComments = 0
-        self.numOfVideos = 0
-        self.numOfDownloads = 0
 
         self.getUserPass()
         #remove the @ and what is after it
@@ -70,16 +68,32 @@ class tiktokBot():
 
     def initCSV(self, filename):
         self.filename = filename
-        #create csv file if it doesn't exist and write the headers: Date, NumOfLikes, NumOfFollows, NumOfComments, NumOfVideos
+        #create csv file if it doesn't exist and write the headers: Date, NumOfLikes, NumOfFollows, NumOfComments, numOfUploads
         if not os.path.isfile(self.filename):
             with open(self.filename, 'w', encoding='utf-8') as f:
-                f.write('Date,NumOfLikes,NumOfFollows,NumOfComments,NumOfVideos,NumOfDownloads\n')
-        
+                f.write('Date,NumOfLikes,NumOfFollows,NumOfComments,NumOfDownloads,numOfUploads\n')
+
+        #wait for the file to be created
+        time.sleep(1)
+
         # if there is no date or the date written is not today's date, write the date
-        with open(self.filename, 'r', encoding='utf-8') as f:
+        with open(self.filename, 'r+', encoding='utf-8') as f:
             lines = f.readlines()
             if len(lines) == 1 or lines[-1].split(',')[0] != time.strftime('%d/%m/%Y'):
-                self.updateCSV()
+                #on a new line add date of today and 0 for the rest
+                f.write(f'{time.strftime("%d/%m/%Y")},0,0,0,0,0\n')
+                self.numOfLikes = 0
+                self.numOfFollows = 0
+                self.numOfComments = 0
+                self.numOfDownloads = 0
+                self.numOfUploads = 0
+            else:
+                self.numOfLikes = float(lines[-1].split(',')[1])
+                self.numOfFollows = float(lines[-1].split(',')[2])
+                self.numOfComments = float(lines[-1].split(',')[3])
+                self.numOfDownloads = float(lines[-1].split(',')[4])
+                self.numOfUploads = float(lines[-1].split(',')[5])
+                
 
     def updateCSV(self):
         #update the last line of the csv file
@@ -90,8 +104,8 @@ class tiktokBot():
             lastLine[1] = str(self.numOfLikes)
             lastLine[2] = str(self.numOfFollows)
             lastLine[3] = str(self.numOfComments)
-            lastLine[4] = str(self.numOfVideos)
-            lastLine[5] = str(self.numOfDownloads)
+            lastLine[4] = str(self.numOfDownloads)
+            lastLine[5] = str(self.numOfUploads)
             lines[-1] = ','.join(lastLine)
         with open(self.filename, 'w', encoding='utf-8') as f:
             f.writelines(lines)
@@ -197,11 +211,18 @@ class tiktokBot():
             self.searchBTN = self.bot.find_element_by_name('q')
             time.sleep(0.5)
             self.searchBTN.click()
+            
             self.searchBTN.send_keys(topic)
             self.searchBTN.send_keys(Keys.ENTER)
         except:
+            #print the search to handle web page format example: search hello world+ -> hello%20world%2B&t
+            topic = topic.replace(' ', '%20')
+            topic = topic.replace('+', '%2B')
+
             print('\033[91m' + 'Error searching for ' + topic + '\033[0m')
-            time.sleep(5)
+            time.sleep(10)
+            print('Trying again...')
+            self.goTo('https://www.tiktok.com/search?q=' + topic)
 
     def scroll(self, scroll_times=10):
         print('Scrolling...')
@@ -296,10 +317,10 @@ class tiktokBot():
         self.goTo('https://www.tiktok.com/upload?lang=en')
 
         ############################## Select video ########################################  
-        time.sleep(10)
+        time.sleep(18)
         print(f'Selecting video {video}...')
         upload_button = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 11).send_keys(Keys.ENTER).perform()
+        ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 8).send_keys(Keys.ENTER).perform()
 
         ############################## Selecting video from file explorer ####################
         # copy the video path to the clipboard
@@ -323,7 +344,7 @@ class tiktokBot():
         # label_box get current selected field use action chains to tab 6 times from the current selected field
         current = self.bot.switch_to.active_element
         time.sleep(1)
-        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 5).perform()
+        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
         time.sleep(1)
         # Paste the description into the label box
         self.bot.switch_to.active_element
@@ -339,7 +360,7 @@ class tiktokBot():
 
         ############################## Uplad video ####################################
         #11 tabs to get to the post button from the description box
-        ActionChains(self.bot).send_keys(Keys.TAB * 11).perform()
+        ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
         time.sleep(1)
         print('Tabbed to post button')
         #Get the current selected field and click enter
@@ -349,7 +370,7 @@ class tiktokBot():
         ActionChains(self.bot).move_to_element(boton_post).send_keys(Keys.ENTER).perform()
 
         print('Video uploaded!')
-        self.numOfVideos += 1
+        self.numOfUploads += 1
         time.sleep(10)
 
 
@@ -419,11 +440,15 @@ class tiktokBot():
             try:
                 #go to https://www.tiktok.com/ + username
                 self.goTo(f'https://www.tiktok.com/{username}')
-                time.sleep(0.1)
+                time.sleep(5)
                 #click on follow
                 follow_user = self.bot.find_elements_by_css_selector('[data-e2e="follow-button"]')
-                follow_user[0].click()
-                time.sleep(1.5)
+                # follow_user[0].click() 
+
+                follow_user[0].send_keys(Keys.ENTER)
+                #wait for the page to load
+                time.sleep(10)
+
                 print('\033[92m' + f'Siguiendo a {username}' + '\033[0m')
                 self.numOfFollows += 1
             except Exception as e:
