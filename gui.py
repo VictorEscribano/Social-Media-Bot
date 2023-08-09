@@ -31,7 +31,7 @@ def download_routine(bot, search_text, num_of_videos=4, scroll=1):
     time.sleep(5)
     print('\033[94m' + 'Saliendo de rutina de Descargas\n' + '\033[0m')
 
-def upload_routine(bot, video, Description, full_path):
+def upload_routine(bot, video, Description, full_path=r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'):
     print('\033[94m' + 'Entrando en rutina de Uploading' + '\033[0m')
     st.write("Running Upload Routine")
     if Description == None:
@@ -87,7 +87,7 @@ def main():
 
     # Upload Routine UI
     st.header("Upload Routine")
-    videos_folder = st.text_input("Paste the path where videos will be saved", "/path/to/videos")
+    videos_folder = st.text_input("Paste the path where videos will be saved", "videos/")
     num_uploads = st.number_input("Number of uploads to do", min_value=1, value=3)
     description = st.text_area("Video Description")
     upload_enabled = st.checkbox("Enable Upload Routine", key="upload_enabled")
@@ -112,12 +112,12 @@ def main():
                 console.text(f'Going to {search_text}')
         
         if upload_enabled:
-            video_files = os.listdir(videos_folder)
-            for video in video_files:
+            # video_files = os.listdir(videos_folder)
+            for video in glob.glob(f'{videos_folder}*.mp4'):
                 if (bot.numOfUploads > num_uploads and bot.CheckDate()):
                     console.text('We have reached the limit of uploads for today')
                     break
-                upload_routine(bot, video, description, videos_folder)
+                upload_routine(bot, video, description)
                 console.text(f'Uploading video {video}')
                 shutil.move(os.path.join(videos_folder, video), 'Used_videos')
                 time.sleep(1)
