@@ -5,7 +5,6 @@ from TikTokBot import *
 from Chatbot import *
 import shutil
 
-
 def download_routine(bot, search_text, num_of_videos=4, scroll=1):
     print('\033[94m' + 'Empezando rutina de Desacargas' + '\033[0m')
     st.write("Running Download Routine")
