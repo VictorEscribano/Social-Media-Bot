@@ -17,7 +17,6 @@ from selenium.webdriver.chrome.options import Options
 import requests
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-import pyautogui
 import os
 import pyperclip
 import platform
@@ -324,82 +323,7 @@ class tiktokBot():
                 self.numOfDownloads += 1
 
 
-    def upload2TikTok(self, video, description):
-        #render the headless browser
-        self.bot.set_window_size(1920, 1080)
-
-        ############################## Opening preUploading Page ##############################
-        print('Entering PreUploading page...')
-        #https://www.tiktok.com/upload?lang=en go here
-        self.goTo('https://www.tiktok.com/upload?lang=en')
-
-        ############################## Select video ########################################  
-        time.sleep(18)
-        print(f'Selecting video {video}...')
-        upload_button = self.bot.switch_to.active_element
-        ActionChains(self.bot).move_to_element(upload_button).send_keys(Keys.TAB * 8).send_keys(Keys.ENTER).perform()
-
-        ############################## Selecting video from file explorer ####################
-        # copy the video path to the clipboard
-        pyperclip.copy(video)
-        #another method to copy the video path to the clipboard
-        
-        time.sleep(1)
-        pyautogui.hotkey('ctrl', 'v')
-        pyautogui.press('enter')
-        print(f'Video selected! {video}')
-        time.sleep(1)
-
-        ############################## Entering Uploading page ####################################
-        print('Entering Uploading page...')
-        #click on aria-label="Caption"
-        #tab 6 times after waiting 15 secs
-        
-        #TODO no esperar 15 sino buscar un indicativo que diga que el video ya se subio
-        time.sleep(15)
-        ############################## Adding description ####################################
-        # label_box get current selected field use action chains to tab 6 times from the current selected field
-        current = self.bot.switch_to.active_element
-        time.sleep(1)
-        ActionChains(self.bot).move_to_element(current).send_keys(Keys.TAB * 6).perform()
-        time.sleep(1)
-        # Paste the description into the label box
-        self.bot.switch_to.active_element
-
-        time.sleep(1)
-        #write the description
-        pyperclip.copy(description)
-        time.sleep(1)
-        pyautogui.hotkey('ctrl', 'v')
-        time.sleep(1)
-        # pyautogui.write(description)
-        print('Description added!')
-
-        ############################## Uplad video ####################################
-        #11 tabs to get to the post button from the description box
-        ActionChains(self.bot).send_keys(Keys.TAB * 10).perform()
-        time.sleep(1)
-        print('Tabbed to post button')
-        #Get the current selected field and click enter
-        boton_post = self.bot.switch_to.active_element
-        print(f'Current selected field: {boton_post}')
-        #click enter
-        ActionChains(self.bot).move_to_element(boton_post).send_keys(Keys.ENTER).perform()
-
-        print('Video uploaded!')
-        self.numOfUploads += 1
-        time.sleep(10)
-
-
-        ############################## Closing tab ####################################
-        print('Closing tab...')
-        #add a new tab and close the previous one
-        self.bot.execute_script("window.open('');")
-        self.bot.switch_to.window(self.bot.window_handles[0])
-        self.bot.close()
-        self.bot.switch_to.window(self.bot.window_handles[0])
-
-        time.sleep(2)
+    
         
     
     def like_comments(self, url, scroll_times=10):
@@ -521,24 +445,7 @@ def download_routine(bot, search_text, num_of_videos=4, scroll=1):
     time.sleep(5)
     print('\033[94m' + 'Saliendo de rutina de Descargas\n' + '\033[0m')
 
-def upload_routine(bot, video, Description, full_path=r'C:\Users\vesga\Documentos\Victor\Codin_projects\AutoTikTok'):
-    print('\033[94m' + 'Entrando en rutina de Uploading' + '\033[0m')
-    st.write("Running Upload Routine")
-    if Description == None:
-        print('Error generating description')
-        Description = 'Like and subscribe for more videos! '
-    else:
-        print(f'Description: {Description}')
 
-    try:
-        bot.upload2TikTok(f'{full_path}\{video}', f'{Description} ')
-        time.sleep(1)
-        shutil.move(video, 'Used_videos')
-        time.sleep(1)
-    except Exception as e:
-        print(f'Error uploading video: {e}')
-        bot.goToNewTab()
-    print('\033[94m' + 'Saliendo de rutina de Uploading\n' + '\033[0m')
 
 def like_follow_routine(bot, search_text):
     print('\033[94m' + 'Empezando rutina de Following' + '\033[0m')
@@ -575,12 +482,7 @@ def main():
     num_videos = st.number_input("Number of videos to download", min_value=1, value=5)
     download_enabled = st.checkbox("Enable Download Routine", key="download_enabled")
 
-    # Upload Routine UI
-    st.header("Upload Routine")
-    videos_folder = st.text_input("Paste the path where videos will be saved", "videos/")
-    num_uploads = st.number_input("Number of uploads to do", min_value=1, value=3)
-    description = st.text_area("Video Description")
-    upload_enabled = st.checkbox("Enable Upload Routine", key="upload_enabled")
+    
 
     # Like and Following Routine UI
     st.header("Like and Following Routine")
@@ -601,16 +503,7 @@ def main():
                 download_routine(bot, search_text, num_of_videos=num_videos, scroll=1)
                 console.text(f'Going to {search_text}')
         
-        if upload_enabled:
-            # video_files = os.listdir(videos_folder)
-            for video in glob.glob(f'{videos_folder}*.mp4'):
-                if (bot.numOfUploads > num_uploads and bot.CheckDate()):
-                    console.text('We have reached the limit of uploads for today')
-                    break
-                upload_routine(bot, video, description)
-                console.text(f'Uploading video {video}')
-                shutil.move(os.path.join(videos_folder, video), 'Used_videos')
-                time.sleep(1)
+        
 
         if like_follow_enabled:
             for search_text in search_topics.split(","):
