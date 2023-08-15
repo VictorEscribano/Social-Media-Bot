@@ -1,7 +1,9 @@
-selenium
-webdriver_manager
-beautifulsoup4
-pyautogui
-pyperclip
-replicate
-pycountry
+beautifulsoup4==4.12.2
+PyAutoGUI==0.9.54
+pycountry==22.3.5
+pyperclip==1.8.2
+replicate==0.10.0
+Requests==2.31.0
+selenium==3.141.0
+streamlit==1.25.0
+webdriver_manager==4.0.0
