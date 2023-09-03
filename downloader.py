@@ -72,9 +72,9 @@ class tiktokBot():
         self.username.click()
 
         # Type the email address letter by letter with pauses
-        email = 'victorescribanogarcia@gmail.com'
+        email = '@gmail.com'
         # email = 'bakuvic@hotmail.com'
-        password = 'Victor123*'                         
+        password = ''                         
 
         
         for char in email:
