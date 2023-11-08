@@ -1,2 +1,2 @@
 # Social-Media-Bot
-Social Media Bot to generate videos
+Social Media Bot to download, comment, like and upload videos
